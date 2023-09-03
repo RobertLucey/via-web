@@ -4,6 +4,12 @@
 
     <splitpanes horizontal>
       <pane min-size="50">
+        <pulse-loader
+          v-if="$store.state.isLoading"
+          :loading="loading"
+          :color="color"
+          :size="size"
+        ></pulse-loader>
         <ViaMap ref="viaMapComponent" />
       </pane>
 
@@ -26,6 +32,8 @@ import "splitpanes/dist/splitpanes.css";
 
 import { mapState } from "vuex";
 
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
+
 export default {
   name: "ViaHomepage",
   components: {
@@ -34,12 +42,18 @@ export default {
     ViaDetailTables,
     Splitpanes,
     Pane,
+    PulseLoader,
   },
   data() {
     return {};
   },
   computed: {
-    ...mapState(["showSidebar", "showDetailsTable", "mergeRoadSegments"]),
+    ...mapState([
+      "isLoading",
+      "showSidebar",
+      "showDetailsTable",
+      "mergeRoadSegments",
+    ]),
   },
   methods: {
     handleDetailsTableRowSegmentClick(event) {

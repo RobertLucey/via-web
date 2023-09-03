@@ -24,6 +24,7 @@
     "splitpanes": "^3.0.6",
     "vue": "^3.0.0",
     "vue-router": "^4.0.12",
+    "vue-spinner": "^1.0.4",
     "vuex": "^4.0.2"
   },
   "devDependencies": {

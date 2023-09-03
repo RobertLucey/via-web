@@ -77,6 +77,7 @@ const store = createStore({
   state() {
     return {
       // UI Controllers:
+      isLoading: true,
       showSidebar: null,
       showDetailsTable: null,
       mergeRoadSegments: null,
@@ -187,6 +188,8 @@ const store = createStore({
 
           commit("updateGeojson", response.data);
           dispatch("filterTableDetails");
+
+          state.isLoading = false;
         })
         .catch((error) => {
           console.log(error);
