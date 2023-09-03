@@ -83,7 +83,7 @@ export default {
       }
       if (this.$store.state.selectedMetric == "usage") {
         minVal = 0;
-        maxVal = 2;
+        maxVal = 10;
         percent =
           100 * ((feature.properties.count - minVal) / (maxVal - minVal));
       }
