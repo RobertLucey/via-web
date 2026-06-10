@@ -7,8 +7,9 @@ Road quality assessment from cycling around, tools to analyse data collected fro
 ## Usage
 
 To get things going:
- 1. Run `make local_run`
- 2. Open http://localhost:8080
+
+1.  Run `make local_run`
+2.  Open http://localhost:8080
 
 ### Docker
 
