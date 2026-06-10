@@ -1,6 +1,9 @@
 <template>
   <div class="bg-dark list-group-item list-group-item-action">
-    <div class="d-flex w-100 justify-content-start align-items-center">
+    <div
+      class="d-flex w-100 justify-content-start align-items-center"
+      @click="handleMenuItemClick"
+    >
       <!-- Icon -->
       <ViaSidebarItemIcon
         :collapsedIcon="collapsedIcon"
@@ -17,7 +20,6 @@
           'subcontent-expanded': hasSubContent && shouldShowSlot,
           'subcontent-collapsed': hasSubContent && !shouldShowSlot,
         }"
-        @click="handleMenuItemClick()"
       >
         {{ expandedText }}
       </span>
