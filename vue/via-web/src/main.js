@@ -3,6 +3,7 @@ import { createStore } from "vuex";
 import { createRouter, createWebHistory } from "vue-router";
 
 import axios from "axios";
+import { roadRows, visibleFeatures } from "./lib/roads";
 
 import ViaHomepage from "./views/ViaHomepage.vue";
 
@@ -19,56 +20,13 @@ if (process.env.VUE_APP_LOCAL_WEB_URL) {
 }
 
 function mergeStreetGeoJson(state) {
-  state.viewGeojson = JSON.parse(JSON.stringify(state.geojsonResponse));
-
-  if (state.mergeRoadSegments) {
-    let roadQualitiesMap = {};
-
-    state.viewGeojson.features.forEach((thing) => {
-      if (
-        Object.prototype.hasOwnProperty.call(
-          roadQualitiesMap,
-          thing.properties.name
-        )
-      ) {
-        roadQualitiesMap[thing.properties.name].qualities.push(
-          thing.properties.avg
-        );
-        roadQualitiesMap[thing.properties.name].usages.push(
-          thing.properties.count
-        );
-        roadQualitiesMap[thing.properties.name].speeds.push(
-          thing.properties.speed
-        );
-      } else {
-        roadQualitiesMap[thing.properties.name] = {
-          qualities: [thing.properties.avg],
-          usages: [thing.properties.count],
-          speeds: [thing.properties.speed],
-        };
-      }
-    });
-
-    const average = (array) => array.reduce((a, b) => a + b) / array.length;
-
-    state.viewGeojson.features.forEach((feature) => {
-      if (feature.properties.name !== undefined) {
-        feature.properties.count = Math.max.apply(
-          null,
-          roadQualitiesMap[feature.properties.name].usages
-        );
-        if (average(roadQualitiesMap[feature.properties.name].speeds) != 0) {
-          // No speeds given, dirty way of doing this
-          feature.properties.speed = average(
-            roadQualitiesMap[feature.properties.name].speeds
-          );
-        }
-        feature.properties.avg = average(
-          roadQualitiesMap[feature.properties.name].qualities
-        );
-      }
-    });
-  }
+  if (!state.geojsonResponse) return;
+  const features = roadRows(state.geojsonResponse.features, state.mergeRoadSegments).flatMap(row =>
+    row.features.map(feature => ({ ...feature, properties: { ...feature.properties, avg: row.quality, count: row.usage, speed: row.speed === null ? null : row.speed / 3.6 } }))
+  );
+  state.viewGeojson = { type: "FeatureCollection", features };
+  state.tableDetails = visibleFeatures(features, state.latLngBounds);
+  state.selectedRoad = null;
 }
 
 function updateURLHelper(state) {
@@ -76,24 +34,31 @@ function updateURLHelper(state) {
 
   url.searchParams.set("showDetailsTable", state.showDetailsTable);
   url.searchParams.set("selectedMetric", state.selectedMetric);
+  url.searchParams.set("transport_type", state.transportType);
+  url.searchParams.set("mergeRoadSegments", state.mergeRoadSegments);
   url.searchParams.delete("earliestDate");
   url.searchParams.delete("latestDate");
   url.searchParams.set("lat", state.lat);
   url.searchParams.set("lng", state.lng);
   url.searchParams.set("zoomLevel", state.zoomLevel);
 
-  history.pushState("", "Via - Road Quality Analysis", url);
+  history.replaceState("", "Via - Road Quality Analysis", url);
 }
+
+let latestRoadRequest = 0;
 
 const store = createStore({
   state() {
     return {
       // UI Controllers:
       isLoading: true,
+      loadError: null,
+      selectedRoad: null,
       showSidebar: null,
       showDetailsTable: null,
       mergeRoadSegments: null,
       selectedMetric: "quality",
+      transportType: "bike",
 
       // Map Details:
       lat: 53.35,
@@ -122,7 +87,8 @@ const store = createStore({
       } else {
         state.mergeRoadSegments = true;
       }
-      // TODO: should do url stuff
+      updateURLHelper(state);
+      // Update map and table together.
       state.geojsonResponse = JSON.parse(JSON.stringify(state.geojsonResponse));
       mergeStreetGeoJson(state);
     },
@@ -134,32 +100,25 @@ const store = createStore({
       }
       updateURLHelper(state);
     },
+    updateTransportType(state, val) {
+      if (!["bike", "car"].includes(val)) return;
+      state.transportType = val;
+      updateURLHelper(state);
+    },
     updateSelectedMetric(state, val) {
+      if (!["quality", "usage", "speed"].includes(val)) return;
       state.selectedMetric = val;
       updateURLHelper(state);
-      state.geojsonResponse = JSON.parse(JSON.stringify(state.geojsonResponse));
-      mergeStreetGeoJson(state);
     },
-    updateLat(state, val) {
-      if (!Number.isNaN(val)) {
-        state.lat = val;
-        updateURLHelper(state);
-      }
+    updateMapView(state, { lat, lng, zoom, bounds }) {
+      if (Number.isFinite(lat) && Math.abs(lat) <= 90) state.lat = lat;
+      if (Number.isFinite(lng) && Math.abs(lng) <= 180) state.lng = lng;
+      if (Number.isFinite(zoom)) state.zoomLevel = Math.max(1, Math.min(20, zoom));
+      if (bounds) state.latLngBounds = bounds;
+      updateURLHelper(state);
     },
-    updateLng(state, val) {
-      if (!Number.isNaN(val)) {
-        state.lng = val;
-        updateURLHelper(state);
-      }
-    },
-    updateZoomLevel(state, val) {
-      if (!Number.isNaN(val)) {
-        state.zoomLevel = val;
-        updateURLHelper(state);
-      }
-    },
-    updateLatLngBounds(state, val) {
-      state.latLngBounds = val;
+    selectRoad(state, road) {
+      state.selectedRoad = road;
     },
     updateGeojson(state, geojsonResponse) {
       state.geojsonResponse = geojsonResponse;
@@ -170,43 +129,34 @@ const store = createStore({
     },
   },
   actions: {
-    getGeojsonFromAPI({ commit, state, dispatch }) {
-      axios
-        .get(process.env.VUE_APP_API_URL + "/get_geojson")
-        .then((response) => {
-          console.log(
-            "Looking for the API? This is the raw data you can use! Get in touch on Github if you want more details:"
-          );
-          console.log(response.data);
-
-          commit("updateGeojson", response.data);
-          dispatch("filterTableDetails");
-
-          state.isLoading = false;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    setTransportType({ commit, state, dispatch }, value) {
+      if (!["bike", "car"].includes(value) || value === state.transportType) return;
+      commit("updateTransportType", value);
+      return dispatch("getGeojsonFromAPI");
+    },
+    async getGeojsonFromAPI({ commit, state, dispatch }) {
+      const requestId = ++latestRoadRequest;
+      state.selectedRoad = null;
+      state.geojsonResponse = null;
+      state.viewGeojson = null;
+      state.tableDetails = [];
+      state.isLoading = true;
+      state.loadError = null;
+      try {
+        const response = await axios.get(process.env.VUE_APP_API_URL + "/get_geojson", { timeout: 30000, params: { transport_type: state.transportType } });
+        if (requestId !== latestRoadRequest) return;
+        if (response.data?.type !== "FeatureCollection" || !Array.isArray(response.data.features)) throw new Error("Invalid road data");
+        commit("updateGeojson", response.data);
+        dispatch("filterTableDetails");
+      } catch (error) {
+        if (requestId !== latestRoadRequest) return;
+        state.loadError = "Road data could not be loaded. Check your connection and try again.";
+      } finally {
+        if (requestId === latestRoadRequest) state.isLoading = false;
+      }
     },
     filterTableDetails({ commit, state }) {
-      if (!state.showDetailsTable) {
-        return;
-      }
-      if (state.geojsonResponse === null) {
-        return;
-      }
-
-      // TODO: Maybe only do if num of features inside boundary is small enough to not crash
-      let filteredDetails = state.geojsonResponse.features.filter((f) => {
-        if (state.latLngBounds == null) {
-          return true;
-        }
-
-        let coords = f.geometry.coordinates[0];
-        return state.latLngBounds.contains([coords[1], coords[0]]);
-      });
-
-      commit("updateTableDetails", filteredDetails);
+      commit("updateTableDetails", visibleFeatures(state.viewGeojson?.features || [], state.latLngBounds));
     },
   },
 });

@@ -24,15 +24,15 @@
         :isExpanded="isExpanded"
         hasSubContent
       >
-        <p>Via is a way to monitor road safety for cyclists.</p>
+        <p>Via is a way to explore road conditions from bike and vehicle journeys.</p>
         <p>
           With a strong emphasis on privacy, the
           <a href="https://github.com/RobertLucey/via-app/releases/latest"
             >Via app</a
           >
-          calculates the quality of roads you cycle on and allows them to be
+          calculates the quality of roads you travel on and allows them to be
           aggregated with all other journeys so you can get a full view of what
-          roads cyclists use, what condition the roads are in and how efficient
+          roads people use, what condition the roads are in and how efficient
           different routes are.
         </p>
         <p>
@@ -43,7 +43,7 @@
         </p>
         <p>
           If you want to help have a more transparent, complete coverage of
-          cycling road quaity, you can download the app
+          road quality, you can download the app
           <a href="https://github.com/RobertLucey/via-app/releases/latest"
             >here</a
           >.
@@ -72,7 +72,7 @@
         collapsedIcon="fa-github"
         expandedText="Contribute"
         :isExpanded="isExpanded"
-        href="https://github.com/conor-f/via-web"
+        href="https://github.com/RobertLucey/via-web"
       >
       </ViaSidebarItem>
     </ul>
