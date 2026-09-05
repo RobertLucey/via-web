@@ -42,7 +42,8 @@ export default {
       const value = measurement(feature.properties[field], field === 'avg');
       const max = this.selectedMetric === 'quality' ? 50 : 10;
       const ratio = value === null ? 0 : Math.max(0, Math.min(1, value / max));
-      const colors = ['#f0b35b', '#bd956c', '#827b7b', '#486c83', '#155e83'];
+      const colors = ['#d73027', '#fc8d59', '#fee08b', '#91cf60', '#1a9850'];
+      if (this.selectedMetric === 'quality') colors.reverse();
       return { color: value === null ? '#87939c' : colors[Math.round(ratio * 4)], weight: 5, opacity: 0.9, dashArray: value === null ? '4 6' : null };
     },
     bindRoad(feature, layer) {

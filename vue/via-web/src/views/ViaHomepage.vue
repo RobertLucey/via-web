@@ -30,7 +30,7 @@
         <div class="map-status" role="status" v-else-if="!tableDetails?.length">No {{ transportType === 'bike' ? 'bike' : 'vehicle' }} measurements in this area. Zoom out or search for a road.</div>
         <aside class="legend" aria-label="Map legend">
           <strong>{{ legend.title }}</strong>
-          <div class="legend-gradient"></div>
+          <div class="legend-gradient" :class="{ 'roughness-gradient': selectedMetric === 'quality' }"></div>
           <div class="legend-labels"><span>{{ legend.low }}</span><span>{{ legend.high }}</span></div>
           <p>{{ legend.description }}</p>
           <span class="missing-swatch"></span> No data
@@ -111,7 +111,8 @@ html, body, #app { margin: 0; height: 100%; }
 .legend, .road-details { position: absolute; z-index: 1000; background: white; box-shadow: 0 3px 18px #243b4533; border-radius: 10px; padding: 16px; }
 .legend { bottom: 28px; left: 12px; width: 255px; font-size: 12px; }
 .legend strong { font-size: 14px; }
-.legend-gradient { height: 8px; border-radius: 4px; margin: 10px 0 5px; background: linear-gradient(to right, #f0b35b, #bd956c, #827b7b, #486c83, #155e83); }
+.legend-gradient { height: 8px; border-radius: 4px; margin: 10px 0 5px; background: linear-gradient(to right, #d73027, #fc8d59, #fee08b, #91cf60, #1a9850); }
+.legend-gradient.roughness-gradient { background: linear-gradient(to right, #1a9850, #91cf60, #fee08b, #fc8d59, #d73027); }
 .legend-labels { display: flex; justify-content: space-between; }
 .legend p { margin: 8px 0; }
 .missing-swatch { display: inline-block; width: 22px; border-top: 3px dashed #87939c; margin-right: 5px; vertical-align: middle; }
