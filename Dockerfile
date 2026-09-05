@@ -1,13 +1,12 @@
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive
+FROM node:16-bullseye
 
-WORKDIR /code
+WORKDIR /code/vue/via-web
 
-RUN apt -y update
-RUN apt -y install make build-essential npm vim
+COPY vue/via-web/package*.json ./
+RUN npm ci
 
-COPY . .
+COPY vue/via-web/ ./
 
 EXPOSE 8080
 
-CMD ["make", "production_run"]
+CMD ["npm", "run", "serve", "--", "--host", "0.0.0.0", "--port", "8080"]

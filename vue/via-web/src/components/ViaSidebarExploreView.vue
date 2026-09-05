@@ -1,22 +1,6 @@
 <template>
   <div id="inputs_container">
     <form id="pull_journeys_form">
-      <!-- Time ranges: -->
-      <label for="earliest_date"> Earliest: </label>
-      <br />
-
-      <input type="month" v-model="earliestDate" min="2021-01" />
-      <br />
-      <br />
-
-      <label for="latest_date"> Latest: </label>
-      <br />
-
-      <input type="month" v-model="latestDate" max="2022-12" />
-      <br />
-      <br />
-      <!-- End time ranges -->
-
       <label for="selectedMetric"> Focus Metric </label>
       <select
         v-model="selectedMetric"
@@ -59,30 +43,7 @@ export default {
     return {};
   },
   computed: {
-    ...mapState([
-      "earliestDate",
-      "latestDate",
-      "mergeRoadSegments",
-      "showDetailsTable",
-    ]),
-    earliestDate: {
-      get() {
-        return this.$store.state.earliestDate;
-      },
-      set(val) {
-        this.$store.commit("updateEarliestDate", val);
-        this.$store.dispatch("getGeojsonFromAPI");
-      },
-    },
-    latestDate: {
-      get() {
-        return this.$store.state.latestDate;
-      },
-      set(val) {
-        this.$store.commit("updateLatestDate", val);
-        this.$store.dispatch("getGeojsonFromAPI");
-      },
-    },
+    ...mapState(["mergeRoadSegments", "showDetailsTable"]),
     mergeRoadSegments: {
       get() {
         return this.$store.state.mergeRoadSegments;

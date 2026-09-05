@@ -1,0 +1,18 @@
+services:
+  dev:
+    build: .
+    environment:
+      VUE_APP_API_URL: http://api.localhost:8080
+      VUE_APP_LOCAL_WEB_URL: http://localhost:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./vue/via-web:/code/vue/via-web
+      - /code/vue/via-web/node_modules
+
+  prod:
+    build: .
+    environment:
+      VUE_APP_API_URL: https://viaroads.com
+    ports:
+      - "8080:8080"

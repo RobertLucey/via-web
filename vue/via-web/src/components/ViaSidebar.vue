@@ -38,8 +38,8 @@
         <p>
           Feel free to start exploring by expanding the Explore tab below, or
           use the Examples section to see some interesting default views.
-          <a href="mailto:via@randombits.host">Get in touch</a> for any and all
-          feedback or to get more details about the project.
+          <a href="mailto:viaroadsdeveloper@gmail.com">Get in touch</a> for any
+          and all feedback or to get more details about the project.
         </p>
         <p>
           If you want to help have a more transparent, complete coverage of

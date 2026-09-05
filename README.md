@@ -6,11 +6,14 @@ Road quality assessment from cycling around, tools to analyse data collected fro
 
 ## Usage
 
-To get things going:
+Run the development site `http://localhost:8080` against the local API at `http://api.localhost:8080`:
 
-1.  Run `make local_run`
-2.  Open http://localhost:8080
+```sh
+docker compose up dev --build
+```
 
-### Docker
+Run the site against the production API:
 
-A web interface has been Dockerized and is available [here](https://hub.docker.com/repository/docker/conorjf/via-web).
+```sh
+docker compose up prod --build
+```

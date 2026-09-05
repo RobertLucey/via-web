@@ -6,6 +6,18 @@ import axios from "axios";
 
 import ViaHomepage from "./views/ViaHomepage.vue";
 
+if (process.env.VUE_APP_LOCAL_WEB_URL) {
+  axios.interceptors.request.use((config) => {
+    if (config.url) {
+      config.url = config.url.replace(
+        /^https?:\/\/via-web\.randombits\.host/,
+        process.env.VUE_APP_LOCAL_WEB_URL
+      );
+    }
+    return config;
+  });
+}
+
 function mergeStreetGeoJson(state) {
   state.viewGeojson = JSON.parse(JSON.stringify(state.geojsonResponse));
 
@@ -64,8 +76,8 @@ function updateURLHelper(state) {
 
   url.searchParams.set("showDetailsTable", state.showDetailsTable);
   url.searchParams.set("selectedMetric", state.selectedMetric);
-  url.searchParams.set("earliestDate", state.earliestDate);
-  url.searchParams.set("latestDate", state.latestDate);
+  url.searchParams.delete("earliestDate");
+  url.searchParams.delete("latestDate");
   url.searchParams.set("lat", state.lat);
   url.searchParams.set("lng", state.lng);
   url.searchParams.set("zoomLevel", state.zoomLevel);
@@ -82,10 +94,6 @@ const store = createStore({
       showDetailsTable: null,
       mergeRoadSegments: null,
       selectedMetric: "quality",
-
-      // Form Values:
-      earliestDate: "2021-01",
-      latestDate: "2022-12",
 
       // Map Details:
       lat: 53.35,
@@ -132,14 +140,6 @@ const store = createStore({
       state.geojsonResponse = JSON.parse(JSON.stringify(state.geojsonResponse));
       mergeStreetGeoJson(state);
     },
-    updateEarliestDate(state, val) {
-      state.earliestDate = val;
-      updateURLHelper(state);
-    },
-    updateLatestDate(state, val) {
-      state.latestDate = val;
-      updateURLHelper(state);
-    },
     updateLat(state, val) {
       if (!Number.isNaN(val)) {
         state.lat = val;
@@ -172,14 +172,7 @@ const store = createStore({
   actions: {
     getGeojsonFromAPI({ commit, state, dispatch }) {
       axios
-        .get(
-          // TODO: This should be populated even more intelligently haha...
-          process.env.VUE_APP_API_URL +
-            "/get_geojson?earliest_time=" +
-            state.earliestDate +
-            "&latest_time=" +
-            state.latestDate
-        )
+        .get(process.env.VUE_APP_API_URL + "/get_geojson")
         .then((response) => {
           console.log(
             "Looking for the API? This is the raw data you can use! Get in touch on Github if you want more details:"
