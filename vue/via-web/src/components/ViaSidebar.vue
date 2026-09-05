@@ -24,7 +24,10 @@
         :isExpanded="isExpanded"
         hasSubContent
       >
-        <p>Via is a way to explore road conditions from bike and vehicle journeys.</p>
+        <p>
+          Via is a way to explore road conditions from bike and vehicle
+          journeys.
+        </p>
         <p>
           With a strong emphasis on privacy, the
           <a href="https://github.com/RobertLucey/via-app/releases/latest"
@@ -42,8 +45,8 @@
           and all feedback or to get more details about the project.
         </p>
         <p>
-          If you want to help have a more transparent, complete coverage of
-          road quality, you can download the app
+          If you want to help have a more transparent, complete coverage of road
+          quality, you can download the app
           <a href="https://github.com/RobertLucey/via-app/releases/latest"
             >here</a
           >.

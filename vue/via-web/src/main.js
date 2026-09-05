@@ -21,8 +21,19 @@ if (process.env.VUE_APP_LOCAL_WEB_URL) {
 
 function mergeStreetGeoJson(state) {
   if (!state.geojsonResponse) return;
-  const features = roadRows(state.geojsonResponse.features, state.mergeRoadSegments).flatMap(row =>
-    row.features.map(feature => ({ ...feature, properties: { ...feature.properties, avg: row.quality, count: row.usage, speed: row.speed === null ? null : row.speed / 3.6 } }))
+  const features = roadRows(
+    state.geojsonResponse.features,
+    state.mergeRoadSegments
+  ).flatMap((row) =>
+    row.features.map((feature) => ({
+      ...feature,
+      properties: {
+        ...feature.properties,
+        avg: row.quality,
+        count: row.usage,
+        speed: row.speed === null ? null : row.speed / 3.6,
+      },
+    }))
   );
   state.viewGeojson = { type: "FeatureCollection", features };
   state.tableDetails = visibleFeatures(features, state.latLngBounds);
@@ -113,7 +124,8 @@ const store = createStore({
     updateMapView(state, { lat, lng, zoom, bounds }) {
       if (Number.isFinite(lat) && Math.abs(lat) <= 90) state.lat = lat;
       if (Number.isFinite(lng) && Math.abs(lng) <= 180) state.lng = lng;
-      if (Number.isFinite(zoom)) state.zoomLevel = Math.max(1, Math.min(20, zoom));
+      if (Number.isFinite(zoom))
+        state.zoomLevel = Math.max(1, Math.min(20, zoom));
       if (bounds) state.latLngBounds = bounds;
       updateURLHelper(state);
     },
@@ -130,7 +142,8 @@ const store = createStore({
   },
   actions: {
     setTransportType({ commit, state, dispatch }, value) {
-      if (!["bike", "car"].includes(value) || value === state.transportType) return;
+      if (!["bike", "car"].includes(value) || value === state.transportType)
+        return;
       commit("updateTransportType", value);
       return dispatch("getGeojsonFromAPI");
     },
@@ -143,20 +156,31 @@ const store = createStore({
       state.isLoading = true;
       state.loadError = null;
       try {
-        const response = await axios.get(process.env.VUE_APP_API_URL + "/get_geojson", { timeout: 30000, params: { transport_type: state.transportType } });
+        const response = await axios.get(
+          process.env.VUE_APP_API_URL + "/get_geojson",
+          { timeout: 30000, params: { transport_type: state.transportType } }
+        );
         if (requestId !== latestRoadRequest) return;
-        if (response.data?.type !== "FeatureCollection" || !Array.isArray(response.data.features)) throw new Error("Invalid road data");
+        if (
+          response.data?.type !== "FeatureCollection" ||
+          !Array.isArray(response.data.features)
+        )
+          throw new Error("Invalid road data");
         commit("updateGeojson", response.data);
         dispatch("filterTableDetails");
       } catch (error) {
         if (requestId !== latestRoadRequest) return;
-        state.loadError = "Road data could not be loaded. Check your connection and try again.";
+        state.loadError =
+          "Road data could not be loaded. Check your connection and try again.";
       } finally {
         if (requestId === latestRoadRequest) state.isLoading = false;
       }
     },
     filterTableDetails({ commit, state }) {
-      commit("updateTableDetails", visibleFeatures(state.viewGeojson?.features || [], state.latLngBounds));
+      commit(
+        "updateTableDetails",
+        visibleFeatures(state.viewGeojson?.features || [], state.latLngBounds)
+      );
     },
   },
 });
