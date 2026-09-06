@@ -1,5 +1,6 @@
 <template>
   <l-map
+    class="road-map"
     :zoom="zoomLevel"
     :center="[lat, lng]"
     @ready="mapReady"
@@ -11,13 +12,21 @@
       attribution='Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     />
     <l-geo-json
+      v-if="map && viewGeojson"
+      :key="`outline-${layerKey}`"
+      pane="roadOutlines"
+      :geojson="viewGeojson"
+      :options="outlineOptions"
+    />
+    <l-geo-json
       v-if="viewGeojson"
       :key="layerKey"
       :geojson="viewGeojson"
       :options="options"
     />
     <l-geo-json
-      v-if="selectedRoad"
+      v-if="map && selectedRoad"
+      pane="roadSelection"
       :geojson="selection"
       :options="highlightOptions"
     />
@@ -36,7 +45,7 @@ export default {
     layerKey: 0,
     resizeObserver: null,
     highlightOptions: {
-      style: { color: "#172b4d", weight: 9, opacity: 0.8 },
+      style: { color: "#ffffff", weight: 13, opacity: 1 },
       interactive: false,
     },
   }),
@@ -59,6 +68,17 @@ export default {
     options() {
       return { style: this.styleRoad, onEachFeature: this.bindRoad };
     },
+    outlineOptions() {
+      return {
+        interactive: false,
+        style: (feature) => ({
+          ...this.styleRoad(feature),
+          color: "#101820",
+          weight: 9,
+          opacity: 1,
+        }),
+      };
+    },
   },
   watch: {
     selectedMetric() {
@@ -73,6 +93,13 @@ export default {
   },
   methods: {
     mapReady(map) {
+      // Keep outlines below every coloured segment, including after updates.
+      const outlinePane = map.createPane("roadOutlines");
+      outlinePane.style.zIndex = 399;
+      outlinePane.style.pointerEvents = "none";
+      const selectionPane = map.createPane("roadSelection");
+      selectionPane.style.zIndex = 398;
+      selectionPane.style.pointerEvents = "none";
       this.map = markRaw(map);
       this.resizeObserver = new ResizeObserver(() => map.invalidateSize());
       this.resizeObserver.observe(map.getContainer());
@@ -100,8 +127,8 @@ export default {
       if (this.selectedMetric === "quality") colors.reverse();
       return {
         color: value === null ? "#87939c" : colors[Math.round(ratio * 4)],
-        weight: 5,
-        opacity: 0.9,
+        weight: 6,
+        opacity: 1,
         dashArray: value === null ? "4 6" : null,
       };
     },
@@ -150,3 +177,14 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.road-map {
+  background: #16191d;
+}
+
+/* Darken only the basemap: measurement colours and controls stay unchanged. */
+.road-map :deep(.leaflet-tile-pane) {
+  filter: grayscale(1) invert(1) brightness(0.65) contrast(0.9);
+}
+</style>
