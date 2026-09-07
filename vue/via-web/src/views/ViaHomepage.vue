@@ -59,7 +59,7 @@
             </button>
           </li>
           <li v-if="!searchResults.length">
-            {{ isLoading ? "Loading roads…" : "No matching recorded roads." }}
+            {{ isLoading ? "Loading roads…" : isPreparing ? "Road data is being prepared…" : "No matching recorded roads." }}
           </li>
         </ul>
       </div>
@@ -70,6 +70,10 @@
         <div class="map-status" role="status" v-if="isLoading">
           Loading
           {{ transportType === "bike" ? "bike" : "vehicle" }} measurements…
+        </div>
+        <div class="map-status" role="status" v-else-if="isPreparing">
+          Road data is being prepared. Please check again shortly.
+          <button @click="$store.dispatch('getGeojsonFromAPI')">Check again</button>
         </div>
         <div class="map-status error" role="alert" v-else-if="loadError">
           {{ loadError }}
@@ -171,6 +175,7 @@ export default {
     ...mapState([
       "transportType",
       "isLoading",
+      "isPreparing",
       "loadError",
       "tableDetails",
       "showDetailsTable",

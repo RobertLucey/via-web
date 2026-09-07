@@ -63,6 +63,7 @@ const store = createStore({
     return {
       // UI Controllers:
       isLoading: true,
+      isPreparing: false,
       loadError: null,
       selectedRoad: null,
       showSidebar: null,
@@ -154,6 +155,7 @@ const store = createStore({
       state.viewGeojson = null;
       state.tableDetails = [];
       state.isLoading = true;
+      state.isPreparing = false;
       state.loadError = null;
       try {
         const response = await axios.get(
@@ -161,6 +163,10 @@ const store = createStore({
           { timeout: 30000, params: { transport_type: state.transportType } }
         );
         if (requestId !== latestRoadRequest) return;
+        if (response.status === 202) {
+          state.isPreparing = true;
+          return;
+        }
         if (
           response.data?.type !== "FeatureCollection" ||
           !Array.isArray(response.data.features)
