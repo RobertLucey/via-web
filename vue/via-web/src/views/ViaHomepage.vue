@@ -3,6 +3,7 @@
     <header class="topbar">
       <a class="brand" href="/">Via <span>Road insights</span></a>
       <nav aria-label="Information">
+        <router-link to="/diagnostics">Diagnostics</router-link>
         <button :aria-expanded="showAbout" @click="showAbout = !showAbout">
           About</button
         ><a href="https://github.com/RobertLucey/via-web">Contribute</a>
@@ -59,7 +60,13 @@
             </button>
           </li>
           <li v-if="!searchResults.length">
-            {{ isLoading ? "Loading roads…" : isPreparing ? "Road data is being prepared…" : "No matching recorded roads." }}
+            {{
+              isLoading
+                ? "Loading roads…"
+                : isPreparing
+                ? "Road data is being prepared…"
+                : "No matching recorded roads."
+            }}
           </li>
         </ul>
       </div>
@@ -73,7 +80,9 @@
         </div>
         <div class="map-status" role="status" v-else-if="isPreparing">
           Road data is being prepared. Please check again shortly.
-          <button @click="$store.dispatch('getGeojsonFromAPI')">Check again</button>
+          <button @click="$store.dispatch('getGeojsonFromAPI')">
+            Check again
+          </button>
         </div>
         <div class="map-status error" role="alert" v-else-if="loadError">
           {{ loadError }}

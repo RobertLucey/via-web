@@ -17,3 +17,11 @@ Run the site against the production API:
 ```sh
 docker compose up prod --build
 ```
+
+To run the frontend against an API, override its URL:
+
+```sh
+docker compose run --rm --build --service-ports -e VUE_APP_API_URL=https://api.viaroads.com dev
+```
+
+Replace the URL with your local API address when developing the backend.

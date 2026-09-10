@@ -193,6 +193,11 @@ const store = createStore({
 
 const routes = [
   {
+    path: "/diagnostics",
+    name: "Diagnostics",
+    component: () => import("./views/ViaDiagnostics.vue"),
+  },
+  {
     path: "/",
     name: "Home",
     component: ViaHomepage,

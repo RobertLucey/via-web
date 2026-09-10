@@ -11,8 +11,12 @@
     >
       <template #empty>
         <span v-if="$store.state.isLoading">Loading roads…</span>
-        <span v-else-if="$store.state.isPreparing">Road data is being prepared. Please check again shortly.</span>
-        <span v-else>No roads in this view. Move the map or search for a road above.</span>
+        <span v-else-if="$store.state.isPreparing"
+          >Road data is being prepared. Please check again shortly.</span
+        >
+        <span v-else
+          >No roads in this view. Move the map or search for a road above.</span
+        >
       </template>
       <Column field="name" header="Road" sortable
         ><template #body="{ data }"
