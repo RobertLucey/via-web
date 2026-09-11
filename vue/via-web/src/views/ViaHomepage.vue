@@ -207,7 +207,7 @@ export default {
         quality: {
           title: "Road roughness",
           low: "0 · Smoother",
-          high: "50+ · Rougher",
+          high: this.transportType === "car" ? "30+ · Rougher" : "50+ · Rougher",
           description: "Lower measured roughness means a smoother journey.",
         },
         usage: {
@@ -219,7 +219,7 @@ export default {
         speed: {
           title: "Recorded speed",
           low: "0 km/h",
-          high: "36+ km/h",
+          high: this.transportType === "car" ? "100+ km/h" : "36+ km/h",
           description: "Average recorded speed, not a safety rating.",
         },
       }[this.selectedMetric];

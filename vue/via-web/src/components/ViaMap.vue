@@ -56,6 +56,7 @@ export default {
       "zoomLevel",
       "viewGeojson",
       "selectedMetric",
+      "transportType",
       "selectedRoad",
       "mergeRoadSegments",
     ]),
@@ -82,6 +83,9 @@ export default {
   },
   watch: {
     selectedMetric() {
+      this.layerKey++;
+    },
+    transportType() {
       this.layerKey++;
     },
     viewGeojson() {
@@ -121,7 +125,13 @@ export default {
         this.selectedMetric
       ];
       const value = measurement(feature.properties[field], field === "avg");
-      const max = this.selectedMetric === "quality" ? 50 : 10;
+      const isVehicle = this.transportType === "car";
+      const max = {
+        quality: isVehicle ? 30 : 50,
+        usage: 10,
+        // GeoJSON speed measurements are in metres per second.
+        speed: isVehicle ? 100 / 3.6 : 10,
+      }[this.selectedMetric];
       const ratio = value === null ? 0 : Math.max(0, Math.min(1, value / max));
       const colors = ["#d73027", "#fc8d59", "#fee08b", "#91cf60", "#1a9850"];
       if (this.selectedMetric === "quality") colors.reverse();
