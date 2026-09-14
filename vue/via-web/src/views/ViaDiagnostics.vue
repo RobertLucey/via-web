@@ -448,7 +448,8 @@ export default {
         });
         if (!Array.isArray(data)) throw new Error("Invalid journey list");
         this.journeys = data.filter(
-          (journey) => journey && typeof journey.uuid === "string" && journey.uuid
+          (journey) =>
+            journey && typeof journey.uuid === "string" && journey.uuid
         );
         if (!this.journeys.length)
           this.journeyMessage = "No journeys match the selected type.";

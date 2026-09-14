@@ -207,7 +207,8 @@ export default {
         quality: {
           title: "Road roughness",
           low: "0 · Smoother",
-          high: this.transportType === "car" ? "30+ · Rougher" : "50+ · Rougher",
+          high:
+            this.transportType === "car" ? "30+ · Rougher" : "50+ · Rougher",
           description: "Lower measured roughness means a smoother journey.",
         },
         usage: {
