@@ -24,6 +24,17 @@
             maxlength="200"
             placeholder="Paste a journey UUID"
           />
+          <label for="diagnostic-transport">Journey type</label>
+          <select
+            id="diagnostic-transport"
+            v-model="journeyTransportType"
+            :disabled="loadingJourneys"
+            @change="loadJourneys"
+          >
+            <option value="">All journeys</option>
+            <option value="bike">Bike</option>
+            <option value="vehicle">Vehicle</option>
+          </select>
           <button
             type="button"
             :disabled="loadingJourneys"
@@ -40,8 +51,12 @@
             v-model="journeyUuid"
           >
             <option value="" disabled>Select a journey</option>
-            <option v-for="uuid in journeys" :key="uuid" :value="uuid">
-              {{ uuid }}
+            <option
+              v-for="journey in journeys"
+              :key="journey.uuid"
+              :value="journey.uuid"
+            >
+              {{ journey.region || "Unknown region" }} · {{ journey.uuid }}
             </option>
           </select>
           <p v-if="journeyMessage" role="status">{{ journeyMessage }}</p>
@@ -317,6 +332,7 @@ export default {
   data: () => ({
     journeyUuid: "",
     journeys: [],
+    journeyTransportType: "",
     loadingJourneys: false,
     journeyMessage: "",
     parameters: {},
@@ -418,17 +434,24 @@ export default {
       }
     },
     async loadJourneys() {
+      if (this.loadingJourneys) return;
       this.loadingJourneys = true;
       this.journeyMessage = "";
+      this.journeys = [];
       try {
-        const { data } = await axios.get(`${api}/get_journey_uuids`, {
+        const { data } = await axios.get(`${api}/get_journey_details`, {
+          params: this.journeyTransportType
+            ? { transport_type: this.journeyTransportType }
+            : {},
           timeout: 15000,
           signal: this.controller.signal,
         });
         if (!Array.isArray(data)) throw new Error("Invalid journey list");
-        this.journeys = data.filter((id) => typeof id === "string");
+        this.journeys = data.filter(
+          (journey) => journey && typeof journey.uuid === "string" && journey.uuid
+        );
         if (!this.journeys.length)
-          this.journeyMessage = "No journeys are available.";
+          this.journeyMessage = "No journeys match the selected type.";
       } catch (error) {
         this.journeyMessage = requestError(error);
       } finally {
