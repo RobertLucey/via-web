@@ -107,21 +107,4 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-#via-sidebar {
-  min-height: 100vh;
-  background-color: #333;
-  padding: 0;
-}
-
-.sidebar-expanded {
-  /*
-  width: 230px;
-  max-width: 230px;*/
-}
-
-.sidebar-collapsed {
-  /*width: 60px;*/
-}
-</style>
+<style scoped src="../styles/ViaSidebar.css"></style>

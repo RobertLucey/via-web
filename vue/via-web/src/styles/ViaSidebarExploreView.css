@@ -1,0 +1,22 @@
+.explore-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.explore-controls label {
+  margin: 0;
+  font-size: 14px;
+}
+.metric-switch {
+  display: flex;
+  gap: 4px;
+}
+.metric-switch button {
+  text-transform: capitalize;
+}
+.metric-switch button[aria-pressed="true"] {
+  background: #155e63;
+  color: white;
+  border-color: #155e63;
+}

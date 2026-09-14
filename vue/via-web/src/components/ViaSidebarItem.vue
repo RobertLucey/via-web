@@ -89,38 +89,4 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.list-group-item {
-  color: white;
-}
-
-.list-group-item:hover {
-  background-color: #1d2124 !important;
-}
-
-.subcontent-collapsed::after {
-  content: "\f0d7";
-  font-family: FontAwesome;
-  display: inline;
-  text-align: right;
-  padding-left: 10px;
-}
-
-.subcontent-expanded::after {
-  content: "\f0da";
-  font-family: FontAwesome;
-  display: inline;
-  text-align: right;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-.subcontent {
-  height: auto;
-  padding-top: 20px;
-  padding-left: 30px;
-  font-size: 0.9rem;
-  width: 260px;
-}
-</style>
+<style scoped src="../styles/ViaSidebarItem.css"></style>

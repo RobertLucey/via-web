@@ -188,13 +188,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.road-map {
-  background: #16191d;
-}
-
-/* Darken only the basemap: measurement colours and controls stay unchanged. */
-.road-map :deep(.leaflet-tile-pane) {
-  filter: grayscale(1) invert(1) brightness(0.65) contrast(0.9);
-}
-</style>
+<style scoped src="../styles/ViaMap.css"></style>

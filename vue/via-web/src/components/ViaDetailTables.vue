@@ -58,16 +58,4 @@ export default {
   methods: { displayValue },
 };
 </script>
-<style scoped>
-.road-table {
-  height: 100%;
-  overflow: auto;
-}
-.road-link {
-  border: 0;
-  background: transparent;
-  color: #155e63;
-  text-align: left;
-  text-decoration: underline;
-}
-</style>
+<style scoped src="../styles/ViaDetailTables.css"></style>
