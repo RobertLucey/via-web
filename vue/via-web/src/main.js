@@ -75,7 +75,7 @@ const store = createStore({
       // Map Details:
       lat: 53.35,
       lng: -6.28,
-      zoomLevel: 12,
+      zoomLevel: 14,
       latLngBounds: null, // This is the North-West and South-East LatLng.
 
       // Computed Results:
