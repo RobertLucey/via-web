@@ -49,25 +49,40 @@ for (const transport of ["", "bike", "vehicle"]) {
     assert.equal(url, "https://api.example.test/get_journey_details");
     assert.equal(options.params.transport_type, transport || undefined);
     assert.equal(browser.loadingJourneys, true);
-    assert.equal(browser.journeys.length, 0, "Hide the previous filter's results");
-    return { data: [
-      { uuid: "journey-1", region: "Leinster" },
-      { uuid: "journey-2", region: null },
-      null, {}, { uuid: 42 }, { uuid: "" },
-    ] };
+    assert.equal(
+      browser.journeys.length,
+      0,
+      "Hide the previous filter's results"
+    );
+    return {
+      data: [
+        { uuid: "journey-1", region: "Leinster" },
+        { uuid: "journey-2", region: null },
+        null,
+        {},
+        { uuid: 42 },
+        { uuid: "" },
+      ],
+    };
   };
   await browser.loadJourneys();
   assert.equal(browser.journeys.length, 2);
   assert.equal(browser.journeys[0].region, "Leinster");
   assert.equal(browser.journeys[1].region, null);
-  assert.equal(browser.journeyUuid, "pasted-journey", "Browsing preserves the entered UUID");
+  assert.equal(
+    browser.journeyUuid,
+    "pasted-journey",
+    "Browsing preserves the entered UUID"
+  );
   assert.equal(browser.loadingJourneys, false);
   assert.equal(browser.journeyMessage, "");
 }
 axios.get = async () => ({ data: [] });
 await browser.loadJourneys();
 assert.match(browser.journeyMessage, /No journeys match/);
-axios.get = async () => { throw new Error("Offline"); };
+axios.get = async () => {
+  throw new Error("Offline");
+};
 await browser.loadJourneys();
 assert.equal(browser.journeys.length, 0);
 assert.equal(browser.loadingJourneys, false);
@@ -76,7 +91,9 @@ let finishBrowsing;
 let browseRequests = 0;
 axios.get = () => {
   browseRequests++;
-  return new Promise((resolve) => { finishBrowsing = resolve; });
+  return new Promise((resolve) => {
+    finishBrowsing = resolve;
+  });
 };
 const browsing = browser.loadJourneys();
 await browser.loadJourneys();
