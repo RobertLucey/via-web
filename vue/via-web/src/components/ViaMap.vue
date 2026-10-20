@@ -3,26 +3,13 @@
     class="road-map"
     :zoom="zoomLevel"
     :center="[lat, lng]"
+    :options="{ preferCanvas: true }"
     @ready="mapReady"
     @moveend="updateView"
-    @zoomend="updateView"
   >
     <l-tile-layer
       url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       attribution='Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    />
-    <l-geo-json
-      v-if="map && viewGeojson"
-      :key="`outline-${layerKey}`"
-      pane="roadOutlines"
-      :geojson="viewGeojson"
-      :options="outlineOptions"
-    />
-    <l-geo-json
-      v-if="viewGeojson"
-      :key="layerKey"
-      :geojson="viewGeojson"
-      :options="options"
     />
     <l-geo-json
       v-if="map && selectedRoad"
@@ -34,15 +21,16 @@
 </template>
 <script>
 import "leaflet/dist/leaflet.css";
-import { markRaw } from "vue";
+import { markRaw, toRaw } from "vue";
 import { LMap, LTileLayer, LGeoJson } from "@vue-leaflet/vue-leaflet";
 import { mapState } from "vuex";
 import { measurement, roadRows } from "../lib/roads";
+import { createRoadRenderer } from "../lib/roadLayers";
 export default {
   components: { LMap, LTileLayer, LGeoJson },
   data: () => ({
     map: null,
-    layerKey: 0,
+    roadRenderer: null,
     resizeObserver: null,
     highlightOptions: {
       style: { color: "#ffffff", weight: 13, opacity: 1 },
@@ -66,37 +54,43 @@ export default {
         features: this.selectedRoad.features,
       };
     },
-    options() {
-      return { style: this.styleRoad, onEachFeature: this.bindRoad };
-    },
-    outlineOptions() {
+    metricStyle() {
+      const isVehicle = this.transportType === "car";
       return {
-        interactive: false,
-        style: (feature) => ({
-          ...this.styleRoad(feature),
-          color: "#101820",
-          weight: 9,
-          opacity: 1,
-        }),
+        field: { quality: "avg", usage: "count", speed: "speed" }[
+          this.selectedMetric
+        ],
+        max: {
+          quality: isVehicle ? 30 : 50,
+          usage: 10,
+          speed: isVehicle ? 100 / 3.6 : 10,
+        }[this.selectedMetric],
+        colors:
+          this.selectedMetric === "quality"
+            ? ["#1a9850", "#91cf60", "#fee08b", "#fc8d59", "#d73027"]
+            : ["#d73027", "#fc8d59", "#fee08b", "#91cf60", "#1a9850"],
       };
     },
   },
   watch: {
     selectedMetric() {
-      this.layerKey++;
+      this.roadRenderer?.restyle();
     },
     transportType() {
-      this.layerKey++;
+      this.roadRenderer?.restyle();
     },
     viewGeojson() {
-      this.layerKey++;
+      this.roadRenderer?.sync(this.viewGeojson?.features || []);
     },
   },
   beforeUnmount() {
     this.resizeObserver?.disconnect();
+    this.roadRenderer?.destroy();
   },
   methods: {
-    mapReady(map) {
+    async mapReady(map) {
+      const { geoJSON } = await import("leaflet/dist/leaflet-src.esm");
+      map = toRaw(map);
       // Keep outlines below every coloured segment, including after updates.
       const outlinePane = map.createPane("roadOutlines");
       outlinePane.style.zIndex = 399;
@@ -105,6 +99,10 @@ export default {
       selectionPane.style.zIndex = 398;
       selectionPane.style.pointerEvents = "none";
       this.map = markRaw(map);
+      this.roadRenderer = markRaw(
+        createRoadRenderer(map, geoJSON, this.styleRoad, this.bindRoad)
+      );
+      this.roadRenderer.sync(this.viewGeojson?.features || []);
       this.resizeObserver = new ResizeObserver(() => map.invalidateSize());
       this.resizeObserver.observe(map.getContainer());
       this.updateView();
@@ -121,20 +119,9 @@ export default {
       this.$store.dispatch("filterTableDetails");
     },
     styleRoad(feature) {
-      const field = { quality: "avg", usage: "count", speed: "speed" }[
-        this.selectedMetric
-      ];
+      const { field, max, colors } = this.metricStyle;
       const value = measurement(feature.properties[field], field === "avg");
-      const isVehicle = this.transportType === "car";
-      const max = {
-        quality: isVehicle ? 30 : 50,
-        usage: 10,
-        // GeoJSON speed measurements are in metres per second.
-        speed: isVehicle ? 100 / 3.6 : 10,
-      }[this.selectedMetric];
       const ratio = value === null ? 0 : Math.max(0, Math.min(1, value / max));
-      const colors = ["#d73027", "#fc8d59", "#fee08b", "#91cf60", "#1a9850"];
-      if (this.selectedMetric === "quality") colors.reverse();
       return {
         color: value === null ? "#87939c" : colors[Math.round(ratio * 4)],
         weight: 6,
@@ -143,10 +130,13 @@ export default {
       };
     },
     bindRoad(feature, layer) {
-      const label = document.createElement("span");
-      label.textContent = feature.properties.name || "Unnamed road";
-      layer.bindTooltip(label);
+      layer.bindTooltip(() => {
+        const label = document.createElement("span");
+        label.textContent = layer.feature.properties.name || "Unnamed road";
+        return label;
+      });
       layer.on("click", () => {
+        const feature = layer.feature;
         const features =
           this.mergeRoadSegments && feature.properties.name
             ? this.viewGeojson.features.filter(

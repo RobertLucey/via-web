@@ -36,7 +36,7 @@
           $store.commit('updateMergeRoadSegments', $event.target.checked)
         "
       />
-      Group by road name</label
+      Group by road name in view</label
     >
     <button
       :aria-expanded="showDetailsTable"

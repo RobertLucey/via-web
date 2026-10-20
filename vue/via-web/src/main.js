@@ -1,9 +1,9 @@
-import { createApp } from "vue";
+import { createApp, markRaw } from "vue";
 import { createStore } from "vuex";
 import { createRouter, createWebHistory } from "vue-router";
 
 import axios from "axios";
-import { roadRows, visibleFeatures } from "./lib/roads";
+import { roadView } from "./lib/roads";
 
 import ViaHomepage from "./views/ViaHomepage.vue";
 
@@ -19,25 +19,15 @@ if (process.env.VUE_APP_LOCAL_WEB_URL) {
   });
 }
 
-function mergeStreetGeoJson(state) {
+function refreshRoadView(state) {
   if (!state.geojsonResponse) return;
-  const features = roadRows(
+  const view = roadView(
     state.geojsonResponse.features,
+    state.latLngBounds,
     state.mergeRoadSegments
-  ).flatMap((row) =>
-    row.features.map((feature) => ({
-      ...feature,
-      properties: {
-        ...feature.properties,
-        avg: row.quality,
-        count: row.usage,
-        speed: row.speed === null ? null : row.speed / 3.6,
-      },
-    }))
   );
-  state.viewGeojson = { type: "FeatureCollection", features };
-  state.tableDetails = visibleFeatures(features, state.latLngBounds);
-  state.selectedRoad = null;
+  state.viewGeojson = markRaw(view);
+  state.tableDetails = markRaw(view.features);
 }
 
 function updateURLHelper(state) {
@@ -57,6 +47,7 @@ function updateURLHelper(state) {
 }
 
 let latestRoadRequest = 0;
+let cancelRoadRequest = null;
 
 const store = createStore({
   state() {
@@ -100,9 +91,8 @@ const store = createStore({
         state.mergeRoadSegments = true;
       }
       updateURLHelper(state);
-      // Update map and table together.
-      state.geojsonResponse = JSON.parse(JSON.stringify(state.geojsonResponse));
-      mergeStreetGeoJson(state);
+      state.selectedRoad = null;
+      refreshRoadView(state);
     },
     updateShowDetailsTable(state, val) {
       if (val == "false" || !val) {
@@ -131,14 +121,15 @@ const store = createStore({
       updateURLHelper(state);
     },
     selectRoad(state, road) {
-      state.selectedRoad = road;
+      state.selectedRoad = road ? markRaw(road) : null;
     },
     updateGeojson(state, geojsonResponse) {
-      state.geojsonResponse = geojsonResponse;
-      mergeStreetGeoJson(state);
+      // Road data is immutable; avoid reactive proxies for every coordinate.
+      state.geojsonResponse = markRaw(geojsonResponse);
+      refreshRoadView(state);
     },
-    updateTableDetails(state, tableDetails) {
-      state.tableDetails = tableDetails;
+    refreshRoadView(state) {
+      refreshRoadView(state);
     },
   },
   actions: {
@@ -148,8 +139,11 @@ const store = createStore({
       commit("updateTransportType", value);
       return dispatch("getGeojsonFromAPI");
     },
-    async getGeojsonFromAPI({ commit, state, dispatch }) {
+    async getGeojsonFromAPI({ commit, state }) {
       const requestId = ++latestRoadRequest;
+      if (cancelRoadRequest) cancelRoadRequest();
+      const cancellation = axios.CancelToken.source();
+      cancelRoadRequest = cancellation.cancel;
       state.selectedRoad = null;
       state.geojsonResponse = null;
       state.viewGeojson = null;
@@ -160,7 +154,11 @@ const store = createStore({
       try {
         const response = await axios.get(
           process.env.VUE_APP_API_URL + "/get_geojson",
-          { timeout: 30000, params: { transport_type: state.transportType } }
+          {
+            timeout: 30000,
+            params: { transport_type: state.transportType },
+            cancelToken: cancellation.token,
+          }
         );
         if (requestId !== latestRoadRequest) return;
         if (response.status === 202) {
@@ -173,20 +171,19 @@ const store = createStore({
         )
           throw new Error("Invalid road data");
         commit("updateGeojson", response.data);
-        dispatch("filterTableDetails");
       } catch (error) {
         if (requestId !== latestRoadRequest) return;
         state.loadError =
           "Road data could not be loaded. Check your connection and try again.";
       } finally {
-        if (requestId === latestRoadRequest) state.isLoading = false;
+        if (requestId === latestRoadRequest) {
+          state.isLoading = false;
+          cancelRoadRequest = null;
+        }
       }
     },
-    filterTableDetails({ commit, state }) {
-      commit(
-        "updateTableDetails",
-        visibleFeatures(state.viewGeojson?.features || [], state.latLngBounds)
-      );
+    filterTableDetails({ commit }) {
+      commit("refreshRoadView");
     },
   },
 });
@@ -215,22 +212,11 @@ const router = createRouter({
 import App from "./App.vue";
 
 import PrimeVue from "primevue/config";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
-import InputText from "primevue/inputtext";
-
-import "primevue/resources/themes/saga-blue/theme.css";
-import "primevue/resources/primevue.min.css";
-import "primeicons/primeicons.css";
 
 const app = createApp(App);
 
 app.use(store);
 app.use(router);
 app.use(PrimeVue);
-
-app.component("DataTable", DataTable);
-app.component("Column", Column);
-app.component("InputText", InputText);
 
 app.mount("#app");

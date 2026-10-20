@@ -167,15 +167,17 @@
 </template>
 <script>
 import { mapState } from "vuex";
+import { defineAsyncComponent } from "vue";
 import ViaMap from "../components/ViaMap.vue";
-import ViaDetailTables from "../components/ViaDetailTables.vue";
 import ViaSidebarExploreView from "../components/ViaSidebarExploreView.vue";
 import ViaSidebarExamplesView from "../components/ViaSidebarExamplesView.vue";
-import { roadRows, displayValue } from "../lib/roads";
+import { searchRoads, displayValue } from "../lib/roads";
 export default {
   components: {
     ViaMap,
-    ViaDetailTables,
+    ViaDetailTables: defineAsyncComponent(() =>
+      import("../components/ViaDetailTables.vue")
+    ),
     ViaSidebarExploreView,
     ViaSidebarExamplesView,
   },
@@ -192,15 +194,11 @@ export default {
       "selectedMetric",
       "mergeRoadSegments",
     ]),
-    searchableRoads() {
-      return roadRows(this.$store.state.viewGeojson?.features || [], true);
-    },
     searchResults() {
-      return this.searchableRoads
-        .filter((road) =>
-          road.name.toLowerCase().includes(this.search.trim().toLowerCase())
-        )
-        .slice(0, 8);
+      return searchRoads(
+        this.$store.state.geojsonResponse?.features || [],
+        this.search
+      );
     },
     legend() {
       return {

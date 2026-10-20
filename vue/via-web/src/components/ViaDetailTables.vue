@@ -5,6 +5,9 @@
       :scrollable="true"
       scrollHeight="flex"
       :rowHover="true"
+      :paginator="true"
+      :rows="100"
+      :rowsPerPageOptions="[50, 100, 250]"
       @row-click="$emit('select-road', $event.data)"
       sortField="name"
       :sortOrder="1"
@@ -45,7 +48,13 @@
 </template>
 <script>
 import { roadRows, displayValue } from "../lib/roads";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import "primevue/resources/themes/saga-blue/theme.css";
+import "primevue/resources/primevue.min.css";
+import "primeicons/primeicons.css";
 export default {
+  components: { DataTable, Column },
   emits: ["select-road"],
   computed: {
     rows() {
