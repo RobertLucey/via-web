@@ -47,7 +47,7 @@
   </div>
 </template>
 <script>
-import { roadRows, displayValue } from "../lib/roads";
+import { displayValue } from "../lib/roads";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import "primevue/resources/themes/saga-blue/theme.css";
@@ -58,10 +58,7 @@ export default {
   emits: ["select-road"],
   computed: {
     rows() {
-      return roadRows(
-        this.$store.state.tableDetails || [],
-        this.$store.state.mergeRoadSegments
-      );
+      return this.$store.state.roadTableRows;
     },
   },
   methods: { displayValue },

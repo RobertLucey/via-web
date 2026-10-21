@@ -44,6 +44,12 @@
     >
       {{ showDetailsTable ? "Hide" : "Show" }} road table
     </button>
+    <button
+      :disabled="isLoading"
+      @click="$store.dispatch('getGeojsonFromAPI', { force: true })"
+    >
+      Refresh measurements
+    </button>
   </div>
 </template>
 <script>
@@ -54,6 +60,7 @@ export default {
     "selectedMetric",
     "mergeRoadSegments",
     "showDetailsTable",
+    "isLoading",
   ]),
 };
 </script>

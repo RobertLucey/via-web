@@ -80,13 +80,27 @@
         </div>
         <div class="map-status" role="status" v-else-if="isPreparing">
           Road data is being prepared. Please check again shortly.
-          <button @click="$store.dispatch('getGeojsonFromAPI')">
+          <button
+            @click="$store.dispatch('getGeojsonFromAPI', { force: true })"
+          >
             Check again
           </button>
         </div>
         <div class="map-status error" role="alert" v-else-if="loadError">
           {{ loadError }}
-          <button @click="$store.dispatch('getGeojsonFromAPI')">Retry</button>
+          <button
+            @click="$store.dispatch('getGeojsonFromAPI', { force: true })"
+          >
+            Retry
+          </button>
+        </div>
+        <div class="map-status" role="status" v-else-if="dataNotice">
+          {{ dataNotice }}
+          <button
+            @click="$store.dispatch('getGeojsonFromAPI', { force: true })"
+          >
+            Refresh
+          </button>
         </div>
         <div class="map-status" role="status" v-else-if="!tableDetails?.length">
           No {{ transportType === "bike" ? "bike" : "vehicle" }} measurements in
@@ -171,7 +185,7 @@ import { defineAsyncComponent } from "vue";
 import ViaMap from "../components/ViaMap.vue";
 import ViaSidebarExploreView from "../components/ViaSidebarExploreView.vue";
 import ViaSidebarExamplesView from "../components/ViaSidebarExamplesView.vue";
-import { searchRoads, displayValue } from "../lib/roads";
+import { displayValue } from "../lib/roads";
 export default {
   components: {
     ViaMap,
@@ -193,12 +207,11 @@ export default {
       "selectedRoad",
       "selectedMetric",
       "mergeRoadSegments",
+      "dataNotice",
+      "roadSearchResults",
     ]),
     searchResults() {
-      return searchRoads(
-        this.$store.state.geojsonResponse?.features || [],
-        this.search
-      );
+      return this.roadSearchResults;
     },
     legend() {
       return {
@@ -222,6 +235,11 @@ export default {
           description: "Average recorded speed, not a safety rating.",
         },
       }[this.selectedMetric];
+    },
+  },
+  watch: {
+    search(query) {
+      this.$store.dispatch("searchRoads", query);
     },
   },
   methods: {
