@@ -9,6 +9,10 @@
         ><a href="https://github.com/RobertLucey/via-web">Contribute</a>
       </nav>
     </header>
+    <section class="home-intro" aria-labelledby="home-title">
+      <h1 id="home-title">{{ homeIntro.heading }}</h1>
+      <p>{{ homeIntro.description }}</p>
+    </section>
     <section v-if="showAbout" class="about-panel">
       <button
         class="close-button"
@@ -186,6 +190,7 @@ import ViaMap from "../components/ViaMap.vue";
 import ViaSidebarExploreView from "../components/ViaSidebarExploreView.vue";
 import ViaSidebarExamplesView from "../components/ViaSidebarExamplesView.vue";
 import { displayValue } from "../lib/roads";
+import homeIntro from "../content/homeIntro.json";
 export default {
   components: {
     ViaMap,
@@ -195,7 +200,7 @@ export default {
     ViaSidebarExploreView,
     ViaSidebarExamplesView,
   },
-  data: () => ({ search: "", showAbout: false }),
+  data: () => ({ search: "", showAbout: false, homeIntro }),
   computed: {
     ...mapState([
       "transportType",

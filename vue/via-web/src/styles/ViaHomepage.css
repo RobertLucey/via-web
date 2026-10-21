@@ -61,6 +61,27 @@ body,
 .topbar a {
   color: #155e63;
 }
+.home-intro {
+  padding: 12px 20px;
+  border-bottom: 1px solid #dde5e7;
+  background: white;
+}
+.home-intro h1 {
+  margin: 0 0 3px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.home-intro p {
+  max-width: 950px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #51666f;
+}
+.prerender-loading {
+  padding: 20px;
+}
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -253,6 +274,15 @@ body,
 @media (max-width: 700px) {
   .topbar {
     padding: 8px 12px;
+  }
+  .home-intro {
+    padding: 9px 12px;
+  }
+  .home-intro h1 {
+    font-size: 17px;
+  }
+  .home-intro p {
+    font-size: 12px;
   }
   .brand span {
     display: none;

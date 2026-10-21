@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "test": "node roads.test.mjs && node roadLayers.test.mjs && node roadProcessing.test.mjs && node diagnostics.test.mjs",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build && node scripts/prerender-home.cjs",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
