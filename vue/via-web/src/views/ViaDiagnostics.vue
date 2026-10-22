@@ -2,15 +2,12 @@
   <main class="diagnostics">
     <header class="diagnostic-header">
       <router-link to="/">← Road explorer</router-link>
-      <h1>Snapping diagnostics</h1>
+      <h1>{{ diagnosticsIntro.heading }}</h1>
       <span>One journey at a time</span>
     </header>
     <div class="diagnostic-workspace">
       <aside class="diagnostic-controls">
-        <p>
-          Adjust matching thresholds and compare the original GPS trace with the
-          final snapped journey.
-        </p>
+        <p>{{ diagnosticsIntro.description }}</p>
         <p v-if="setupError" role="alert">
           {{ setupError }}
           <button @click="loadDefaults">Retry connection</button>
@@ -248,6 +245,7 @@ import { markRaw } from "vue";
 // Use the same Leaflet instance as Vue Leaflet's map and GeoJSON renderer.
 import { circleMarker } from "leaflet/dist/leaflet-src.esm";
 import { diagnosticBounds, diagnosticLayers } from "../lib/diagnostics";
+import diagnosticsIntro from "../content/diagnosticsIntro.json";
 import { LMap, LTileLayer, LGeoJson } from "@vue-leaflet/vue-leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -350,6 +348,7 @@ export default {
     controller: null,
     layerVersion: 0,
     compactMap: false,
+    diagnosticsIntro,
     gpsFields,
     matchingFields,
     stats,

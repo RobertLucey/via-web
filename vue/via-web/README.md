@@ -18,10 +18,10 @@ npm run serve
 npm run build
 ```
 
-The build also writes the homepage introduction into `dist/index.html` so its
-heading and explanation are present in the initial response. Vue replaces this
-static shell when the interactive map starts. The text is shared with the Vue
-homepage through `src/content/homeIntro.json`.
+The build writes static introductions into `dist/index.html` and
+`dist/diagnostics/index.html` so both routes have headings and descriptions in
+their initial responses. Vue replaces these shells when the interactive views
+start. The text is shared with the views through `src/content`.
 
 ### Lints and fixes files
 

@@ -7,6 +7,13 @@ import { roadProcessor } from "./lib/roadProcessor";
 import { roadCache } from "./lib/roadCache";
 
 import ViaHomepage from "./views/ViaHomepage.vue";
+import diagnosticsIntro from "./content/diagnosticsIntro.json";
+
+const homeMetadata = {
+  title: "Via | Explore road roughness, usage and speed",
+  description:
+    "Explore road roughness, recorded usage and speed from bike and vehicle journeys on Via's interactive map. See what contributors have measured on roads near you.",
+};
 
 if (process.env.VUE_APP_LOCAL_WEB_URL) {
   axios.interceptors.request.use((config) => {
@@ -312,11 +319,13 @@ const routes = [
     path: "/diagnostics",
     name: "Diagnostics",
     component: () => import("./views/ViaDiagnostics.vue"),
+    meta: diagnosticsIntro,
   },
   {
     path: "/",
     name: "Home",
     component: ViaHomepage,
+    meta: homeMetadata,
     // TODO: This only lets us see the params as route properties, not
     // component props...
     props: true,
@@ -326,6 +335,14 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes: routes,
+});
+
+router.afterEach((to) => {
+  const metadata = to.meta.title ? to.meta : homeMetadata;
+  document.title = metadata.title;
+  document
+    .querySelector('meta[name="description"]')
+    ?.setAttribute("content", metadata.description);
 });
 
 import App from "./App.vue";
